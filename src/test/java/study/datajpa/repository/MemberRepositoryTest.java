@@ -213,6 +213,7 @@ class MemberRepositoryTest {
 
         //when
         int resultCount = memberRepository.bulkAgePlus(20);
+//        em.clear();
 
         List<Member> result = memberRepository.findByUsername("member5");
         Member member5 = result.get(0);
