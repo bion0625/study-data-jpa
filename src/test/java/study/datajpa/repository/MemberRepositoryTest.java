@@ -1,5 +1,7 @@
 package study.datajpa.repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,9 +14,10 @@ import study.datajpa.entity.Team;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -345,5 +348,49 @@ class MemberRepositoryTest {
             System.out.println("memberProjection.username = " + memberProjection.getUsername());
             System.out.println("memberProjection.teamName = " + memberProjection.getTeamName());
         }
+    }
+
+    @Test
+    public static void main(String[] args) {
+        String serviceKey = "3DqT%2FO%2BciTuMn9ZjLCOKnVrSq2d2boC3NcZ3pXXfIdFc4sdlhXx6kSwPdtaVHxdeGmcBVGjG4x6pjZD4B0kVxA%3D%3D";
+//        String jsonInputString = "{\"businesses\" : [{\"b_no\": \"0000000000\", \"start_dt\": \"20000101\", \"p_nm\": \"홍길동\"}]}";
+//        String jsonInputString = "{\"businesses\" : [{\"b_no\": \"6178117517\", \"start_dt\": \"19960715\", \"p_nm\": \"이평우\"}]}";
+        String jsonInputString = "{\"businesses\" : [{\"b_no\": \"1048801274\", \"start_dt\": \"20190614\", \"p_nm\": \"진모비\"}]}";
+        System.out.println("jsonInputString = " + jsonInputString);
+        String response = "";
+        HttpURLConnection connection = null;
+        try{
+            URL url = new URL("https://api.odcloud.kr/api/nts-businessman/v1/validate?serviceKey="+serviceKey);
+            connection = (HttpURLConnection) url.openConnection();
+
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setDoOutput(true);
+
+            OutputStreamWriter osw = new OutputStreamWriter(connection.getOutputStream());
+            osw.write(jsonInputString);
+            osw.flush();
+
+            int responseCode = connection.getResponseCode();
+            System.out.println("responseCode = " + responseCode);
+
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(),"utf-8"));
+            StringBuffer stringBuffer = new StringBuffer();
+            String inputLine;
+
+            while ((inputLine = bufferedReader.readLine()) != null)  {
+                stringBuffer.append(inputLine);
+            }
+            bufferedReader.close();
+            response = stringBuffer.toString();
+        }catch (Exception e){
+            System.out.println(connection.getErrorStream().toString());
+            response += " : error!";
+            e.printStackTrace();
+        }
+
+
+        System.out.println("response = " + response);
     }
 }
